@@ -41,6 +41,12 @@ class Program
                     GestionarPersistencia();
                     break;
                 case "6":
+                    Console.Write("¿Guardar antes de salir? (s/n): ");
+                    string? guardar = Console.ReadLine();
+                    if (guardar?.ToLower() == "s")
+                    {
+                        GuardarDatos();
+                    }
                     salir = true;
                     Console.WriteLine("Saliendo... ¡Hasta luego!");
                     break;
