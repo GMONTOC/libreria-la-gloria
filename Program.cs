@@ -2,6 +2,9 @@
 
 class Program
 {
+    static string[] libros = new string[100]; // Array para almacenar libros (id;titulo;autor;categoria;anio;disponible)
+    static int contadorLibros = 0;
+
     static void Main(string[] args)
     {
         bool salir = false;
@@ -18,7 +21,7 @@ class Program
             switch (opcion)
             {
                 case "1":
-                    Console.WriteLine("Opción 1: Libros (a implementar)");
+                    GestionarLibros();
                     break;
                 case "2":
                     Console.WriteLine("Opción 2: Usuarios (a implementar)");
@@ -64,5 +67,226 @@ class Program
         Console.WriteLine("5. Guardar / Cargar datos");
         Console.WriteLine("6. Salir");
         Console.WriteLine();
+    }
+
+    static void GestionarLibros()
+    {
+        bool volver = false;
+
+        while (!volver)
+        {
+            Console.Clear();
+            MostrarMenuLibros();
+
+            Console.Write("Seleccione una opción (1-6): ");
+            string? opcion = Console.ReadLine();
+            Console.WriteLine();
+
+            switch (opcion)
+            {
+                case "1":
+                    RegistrarLibro();
+                    break;
+                case "2":
+                    ListarLibros();
+                    break;
+                case "3":
+                    VerDetalleLibro();
+                    break;
+                case "4":
+                    ActualizarLibro();
+                    break;
+                case "5":
+                    EliminarLibro();
+                    break;
+                case "6":
+                    volver = true;
+                    break;
+                default:
+                    Console.WriteLine("Opción no válida. Intenta de nuevo.");
+                    break;
+            }
+
+            if (!volver)
+            {
+                Console.WriteLine();
+                Console.WriteLine("Presiona Enter para volver al menú de libros...");
+                Console.ReadLine();
+            }
+        }
+    }
+
+    static void MostrarMenuLibros()
+    {
+        Console.WriteLine("Menú de Libros");
+        Console.WriteLine("1. Registrar libro");
+        Console.WriteLine("2. Listar libros");
+        Console.WriteLine("3. Ver detalle de libro (por ID/ISBN)");
+        Console.WriteLine("4. Actualizar libro");
+        Console.WriteLine("5. Eliminar libro");
+        Console.WriteLine("6. Volver al menú principal");
+        Console.WriteLine();
+    }
+
+    static void RegistrarLibro()
+    {
+        if (contadorLibros >= libros.Length)
+        {
+            Console.WriteLine("No se pueden registrar más libros.");
+            return;
+        }
+
+        Console.Write("ID/ISBN: ");
+        string id = Console.ReadLine() ?? "";
+        Console.Write("Título: ");
+        string titulo = Console.ReadLine() ?? "";
+        Console.Write("Autor: ");
+        string autor = Console.ReadLine() ?? "";
+        Console.Write("Categoría: ");
+        string categoria = Console.ReadLine() ?? "";
+        Console.Write("Año: ");
+        string anio = Console.ReadLine() ?? "";
+        string disponible = "true";
+
+        libros[contadorLibros] = $"{id};{titulo};{autor};{categoria};{anio};{disponible}";
+        contadorLibros++;
+        Console.WriteLine("Libro registrado exitosamente.");
+    }
+
+    static void ListarLibros()
+    {
+        Console.WriteLine("Submenú de Listar Libros");
+        Console.WriteLine("1. Listar todos");
+        Console.WriteLine("2. Listar disponibles");
+        Console.WriteLine("3. Listar prestados");
+        Console.Write("Seleccione: ");
+        string? subopcion = Console.ReadLine();
+
+        switch (subopcion)
+        {
+            case "1":
+                for (int i = 0; i < contadorLibros; i++)
+                {
+                    string[] partes = libros[i].Split(';');
+                    Console.WriteLine($"{partes[0]} - {partes[1]} - {partes[2]} - {partes[5]}");
+                }
+                break;
+            case "2":
+                for (int i = 0; i < contadorLibros; i++)
+                {
+                    string[] partes = libros[i].Split(';');
+                    if (partes[5] == "true")
+                        Console.WriteLine($"{partes[0]} - {partes[1]} - {partes[2]}");
+                }
+                break;
+            case "3":
+                for (int i = 0; i < contadorLibros; i++)
+                {
+                    string[] partes = libros[i].Split(';');
+                    if (partes[5] == "false")
+                        Console.WriteLine($"{partes[0]} - {partes[1]} - {partes[2]}");
+                }
+                break;
+            default:
+                Console.WriteLine("Opción no válida.");
+                break;
+        }
+    }
+
+    static void VerDetalleLibro()
+    {
+        Console.Write("Ingrese ID/ISBN del libro: ");
+        string id = Console.ReadLine() ?? "";
+
+        for (int i = 0; i < contadorLibros; i++)
+        {
+            string[] partes = libros[i].Split(';');
+            if (partes[0] == id)
+            {
+                Console.WriteLine($"ID: {partes[0]}");
+                Console.WriteLine($"Título: {partes[1]}");
+                Console.WriteLine($"Autor: {partes[2]}");
+                Console.WriteLine($"Categoría: {partes[3]}");
+                Console.WriteLine($"Año: {partes[4]}");
+                Console.WriteLine($"Disponible: {partes[5]}");
+                return;
+            }
+        }
+        Console.WriteLine("Libro no encontrado.");
+    }
+
+    static void ActualizarLibro()
+    {
+        Console.Write("Ingrese ID/ISBN del libro a actualizar: ");
+        string id = Console.ReadLine() ?? "";
+
+        for (int i = 0; i < contadorLibros; i++)
+        {
+            string[] partes = libros[i].Split(';');
+            if (partes[0] == id)
+            {
+                Console.WriteLine("Submenú de Actualizar");
+                Console.WriteLine("1. Editar título");
+                Console.WriteLine("2. Editar autor");
+                Console.WriteLine("3. Editar año / categoría");
+                Console.Write("Seleccione: ");
+                string? subopcion = Console.ReadLine();
+
+                switch (subopcion)
+                {
+                    case "1":
+                        Console.Write("Nuevo título: ");
+                        partes[1] = Console.ReadLine() ?? "";
+                        break;
+                    case "2":
+                        Console.Write("Nuevo autor: ");
+                        partes[2] = Console.ReadLine() ?? "";
+                        break;
+                    case "3":
+                        Console.Write("Nuevo año: ");
+                        partes[4] = Console.ReadLine() ?? "";
+                        Console.Write("Nueva categoría: ");
+                        partes[3] = Console.ReadLine() ?? "";
+                        break;
+                    default:
+                        Console.WriteLine("Opción no válida.");
+                        return;
+                }
+
+                libros[i] = string.Join(";", partes);
+                Console.WriteLine("Libro actualizado.");
+                return;
+            }
+        }
+        Console.WriteLine("Libro no encontrado.");
+    }
+
+    static void EliminarLibro()
+    {
+        Console.Write("Ingrese ID/ISBN del libro a eliminar: ");
+        string id = Console.ReadLine() ?? "";
+
+        for (int i = 0; i < contadorLibros; i++)
+        {
+            string[] partes = libros[i].Split(';');
+            if (partes[0] == id)
+            {
+                if (partes[5] == "false")
+                {
+                    Console.WriteLine("No se puede eliminar un libro prestado.");
+                    return;
+                }
+
+                // Mover los libros siguientes
+                for (int j = i; j < contadorLibros - 1; j++)
+                {
+                    libros[j] = libros[j + 1];
+                }
+                contadorLibros--;
+                Console.WriteLine("Libro eliminado.");
+                return;
+            }
+        }
+        Console.WriteLine("Libro no encontrado.");
     }
 }
