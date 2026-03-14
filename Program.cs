@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 class Program
 {
@@ -37,7 +38,7 @@ class Program
                     GestionarBusquedas();
                     break;
                 case "5":
-                    Console.WriteLine("Opción 5: Guardar / Cargar datos (a implementar)");
+                    GestionarPersistencia();
                     break;
                 case "6":
                     salir = true;
@@ -953,6 +954,126 @@ class Program
             default:
                 Console.WriteLine("Opción no válida.");
                 break;
+        }
+    }
+
+    static void GestionarPersistencia()
+    {
+        bool volver = false;
+
+        while (!volver)
+        {
+            Console.Clear();
+            MostrarMenuPersistencia();
+
+            Console.Write("Seleccione una opción (1-4): ");
+            string? opcion = Console.ReadLine();
+            Console.WriteLine();
+
+            switch (opcion)
+            {
+                case "1":
+                    GuardarDatos();
+                    break;
+                case "2":
+                    CargarDatos();
+                    break;
+                case "3":
+                    ReiniciarDatos();
+                    break;
+                case "4":
+                    volver = true;
+                    break;
+                default:
+                    Console.WriteLine("Opción no válida. Intenta de nuevo.");
+                    break;
+            }
+
+            if (!volver)
+            {
+                Console.WriteLine();
+                Console.WriteLine("Presiona Enter para volver al menú de persistencia...");
+                Console.ReadLine();
+            }
+        }
+    }
+
+    static void MostrarMenuPersistencia()
+    {
+        Console.WriteLine("Menú de Guardar / Cargar datos");
+        Console.WriteLine("1. Guardar datos");
+        Console.WriteLine("2. Cargar datos");
+        Console.WriteLine("3. Reiniciar datos (vaciar todo)");
+        Console.WriteLine("4. Volver al menú principal");
+        Console.WriteLine();
+    }
+
+    static void GuardarDatos()
+    {
+        using (var writer = new StreamWriter("libros.txt"))
+        {
+            for (int i = 0; i < contadorLibros; i++)
+                writer.WriteLine(libros[i]);
+        }
+
+        using (var writer = new StreamWriter("usuarios.txt"))
+        {
+            for (int i = 0; i < contadorUsuarios; i++)
+                writer.WriteLine(usuarios[i]);
+        }
+
+        using (var writer = new StreamWriter("prestamos.txt"))
+        {
+            for (int i = 0; i < contadorPrestamos; i++)
+                writer.WriteLine(prestamos[i]);
+        }
+
+        Console.WriteLine("Datos guardados en libros.txt / usuarios.txt / prestamos.txt");
+    }
+
+    static void CargarDatos()
+    {
+        if (File.Exists("libros.txt"))
+        {
+            string[] lineas = File.ReadAllLines("libros.txt");
+            contadorLibros = Math.Min(lineas.Length, libros.Length);
+            for (int i = 0; i < contadorLibros; i++)
+                libros[i] = lineas[i];
+        }
+
+        if (File.Exists("usuarios.txt"))
+        {
+            string[] lineas = File.ReadAllLines("usuarios.txt");
+            contadorUsuarios = Math.Min(lineas.Length, usuarios.Length);
+            for (int i = 0; i < contadorUsuarios; i++)
+                usuarios[i] = lineas[i];
+        }
+
+        if (File.Exists("prestamos.txt"))
+        {
+            string[] lineas = File.ReadAllLines("prestamos.txt");
+            contadorPrestamos = Math.Min(lineas.Length, prestamos.Length);
+            for (int i = 0; i < contadorPrestamos; i++)
+                prestamos[i] = lineas[i];
+        }
+
+        Console.WriteLine("Datos cargados (si los archivos existían).\n");
+    }
+
+    static void ReiniciarDatos()
+    {
+        Console.Write("¿Está seguro que desea eliminar todos los datos? (s/n): ");
+        string? confirm = Console.ReadLine();
+        if (confirm?.ToLower() == "s")
+        {
+            contadorLibros = 0;
+            contadorUsuarios = 0;
+            contadorPrestamos = 0;
+            Console.WriteLine("Datos reiniciados.");
+        }
+        else
+        {
+            Console.WriteLine("Operación cancelada.");
         }
     }
 }
