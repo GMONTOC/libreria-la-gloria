@@ -34,7 +34,7 @@ class Program
                     GestionarPrestamos();
                     break;
                 case "4":
-                    Console.WriteLine("Opción 4: Búsquedas y reportes (a implementar)");
+                    GestionarBusquedas();
                     break;
                 case "5":
                     Console.WriteLine("Opción 5: Guardar / Cargar datos (a implementar)");
@@ -740,5 +740,219 @@ class Program
             }
         }
         Console.WriteLine("Préstamo no encontrado.");
+    }
+
+    static void GestionarBusquedas()
+    {
+        bool volver = false;
+
+        while (!volver)
+        {
+            Console.Clear();
+            MostrarMenuBusquedas();
+
+            Console.Write("Seleccione una opción (1-4): ");
+            string? opcion = Console.ReadLine();
+            Console.WriteLine();
+
+            switch (opcion)
+            {
+                case "1":
+                    BuscarLibro();
+                    break;
+                case "2":
+                    BuscarUsuario();
+                    break;
+                case "3":
+                    Reportes();
+                    break;
+                case "4":
+                    volver = true;
+                    break;
+                default:
+                    Console.WriteLine("Opción no válida. Intenta de nuevo.");
+                    break;
+            }
+
+            if (!volver)
+            {
+                Console.WriteLine();
+                Console.WriteLine("Presiona Enter para volver al menú de búsquedas...");
+                Console.ReadLine();
+            }
+        }
+    }
+
+    static void MostrarMenuBusquedas()
+    {
+        Console.WriteLine("Menú de Búsquedas y Reportes");
+        Console.WriteLine("1. Buscar libro");
+        Console.WriteLine("2. Buscar usuario");
+        Console.WriteLine("3. Reportes");
+        Console.WriteLine("4. Volver al menú principal");
+        Console.WriteLine();
+    }
+
+    static void BuscarLibro()
+    {
+        Console.WriteLine("Buscar libro por:");
+        Console.WriteLine("1. Título");
+        Console.WriteLine("2. Autor");
+        Console.WriteLine("3. ID/ISBN");
+        Console.WriteLine("4. Categoría");
+        Console.Write("Seleccione: ");
+        string? opcion = Console.ReadLine();
+
+        Console.Write("Ingrese término de búsqueda: ");
+        string termino = (Console.ReadLine() ?? "").ToLower();
+
+        for (int i = 0; i < contadorLibros; i++)
+        {
+            string[] partes = libros[i].Split(';');
+            bool match = false;
+
+            switch (opcion)
+            {
+                case "1":
+                    match = partes[1].ToLower().Contains(termino);
+                    break;
+                case "2":
+                    match = partes[2].ToLower().Contains(termino);
+                    break;
+                case "3":
+                    match = partes[0].ToLower().Contains(termino);
+                    break;
+                case "4":
+                    match = partes[3].ToLower().Contains(termino);
+                    break;
+                default:
+                    Console.WriteLine("Opción no válida.");
+                    return;
+            }
+
+            if (match)
+            {
+                Console.WriteLine(
+                    $"{partes[0]} - {partes[1]} - {partes[2]} - {partes[3]} - Disponible: {partes[5]}"
+                );
+            }
+        }
+    }
+
+    static void BuscarUsuario()
+    {
+        Console.WriteLine("Buscar usuario por:");
+        Console.WriteLine("1. Nombre");
+        Console.WriteLine("2. ID/Documento");
+        Console.Write("Seleccione: ");
+        string? opcion = Console.ReadLine();
+
+        Console.Write("Ingrese término de búsqueda: ");
+        string termino = (Console.ReadLine() ?? "").ToLower();
+
+        for (int i = 0; i < contadorUsuarios; i++)
+        {
+            string[] partes = usuarios[i].Split(';');
+            bool match = false;
+
+            switch (opcion)
+            {
+                case "1":
+                    match = partes[1].ToLower().Contains(termino);
+                    break;
+                case "2":
+                    match = partes[0].ToLower().Contains(termino);
+                    break;
+                default:
+                    Console.WriteLine("Opción no válida.");
+                    return;
+            }
+
+            if (match)
+            {
+                Console.WriteLine($"{partes[0]} - {partes[1]} - {partes[2]} - Activo: {partes[3]}");
+            }
+        }
+    }
+
+    static void Reportes()
+    {
+        Console.WriteLine("Reportes");
+        Console.WriteLine("1. Préstamos por usuario");
+        Console.WriteLine("2. Préstamos por libro");
+        Console.WriteLine("3. Préstamos vencidos");
+        Console.WriteLine("4. Resumen general");
+        Console.Write("Seleccione: ");
+        string? opcion = Console.ReadLine();
+
+        switch (opcion)
+        {
+            case "1":
+                Console.Write("ID/Documento de usuario: ");
+                string idUsuario = Console.ReadLine() ?? "";
+                for (int i = 0; i < contadorPrestamos; i++)
+                {
+                    string[] partes = prestamos[i].Split(';');
+                    if (partes[1] == idUsuario)
+                        Console.WriteLine(
+                            $"{partes[0]} - Libro: {partes[2]} - Estado: {partes[6]}"
+                        );
+                }
+                break;
+            case "2":
+                Console.Write("ID/ISBN del libro: ");
+                string idLibro = Console.ReadLine() ?? "";
+                for (int i = 0; i < contadorPrestamos; i++)
+                {
+                    string[] partes = prestamos[i].Split(';');
+                    if (partes[2] == idLibro)
+                        Console.WriteLine(
+                            $"{partes[0]} - Usuario: {partes[1]} - Estado: {partes[6]}"
+                        );
+                }
+                break;
+            case "3":
+                DateTime hoy = DateTime.Now.Date;
+                for (int i = 0; i < contadorPrestamos; i++)
+                {
+                    string[] partes = prestamos[i].Split(';');
+                    if (partes[6] == "activo")
+                    {
+                        if (
+                            DateTime.TryParseExact(
+                                partes[4],
+                                "dd/MM/yyyy",
+                                null,
+                                System.Globalization.DateTimeStyles.None,
+                                out DateTime limite
+                            )
+                        )
+                        {
+                            if (limite < hoy)
+                                Console.WriteLine(
+                                    $"{partes[0]} - Usuario: {partes[1]} - Libro: {partes[2]} - Vencido: {partes[4]}"
+                                );
+                        }
+                    }
+                }
+                break;
+            case "4":
+                int total = contadorLibros;
+                int disponibles = 0;
+                for (int i = 0; i < contadorLibros; i++)
+                {
+                    string[] partes = libros[i].Split(';');
+                    if (partes[5] == "true")
+                        disponibles++;
+                }
+                int prestados = total - disponibles;
+                Console.WriteLine($"Total libros: {total}");
+                Console.WriteLine($"Disponibles: {disponibles}");
+                Console.WriteLine($"Prestados: {prestados}");
+                break;
+            default:
+                Console.WriteLine("Opción no válida.");
+                break;
+        }
     }
 }
