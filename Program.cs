@@ -6,6 +6,8 @@ class Program
     static int contadorLibros = 0;
     static string[] usuarios = new string[100]; // Array para almacenar usuarios (id;nombre;contacto;activo)
     static int contadorUsuarios = 0;
+    static string[] prestamos = new string[100]; // Array para almacenar préstamos (idPrestamo;idUsuario;idLibro;fechaPrestamo;fechaLimite;fechaDevolucion;estado)
+    static int contadorPrestamos = 0;
 
     static void Main(string[] args)
     {
@@ -29,7 +31,7 @@ class Program
                     GestionarUsuarios();
                     break;
                 case "3":
-                    Console.WriteLine("Opción 3: Préstamos (a implementar)");
+                    GestionarPrestamos();
                     break;
                 case "4":
                     Console.WriteLine("Opción 4: Búsquedas y reportes (a implementar)");
@@ -468,5 +470,275 @@ class Program
             }
         }
         Console.WriteLine("Usuario no encontrado.");
+    }
+
+    static void GestionarPrestamos()
+    {
+        bool volver = false;
+
+        while (!volver)
+        {
+            Console.Clear();
+            MostrarMenuPrestamos();
+
+            Console.Write("Seleccione una opción (1-6): ");
+            string? opcion = Console.ReadLine();
+            Console.WriteLine();
+
+            switch (opcion)
+            {
+                case "1":
+                    CrearPrestamo();
+                    break;
+                case "2":
+                    ListarPrestamos();
+                    break;
+                case "3":
+                    VerDetallePrestamo();
+                    break;
+                case "4":
+                    RegistrarDevolucion();
+                    break;
+                case "5":
+                    EliminarPrestamo();
+                    break;
+                case "6":
+                    volver = true;
+                    break;
+                default:
+                    Console.WriteLine("Opción no válida. Intenta de nuevo.");
+                    break;
+            }
+
+            if (!volver)
+            {
+                Console.WriteLine();
+                Console.WriteLine("Presiona Enter para volver al menú de préstamos...");
+                Console.ReadLine();
+            }
+        }
+    }
+
+    static void MostrarMenuPrestamos()
+    {
+        Console.WriteLine("Menú de Préstamos");
+        Console.WriteLine("1. Crear préstamo");
+        Console.WriteLine("2. Listar préstamos");
+        Console.WriteLine("3. Ver detalle de préstamo (por ID)");
+        Console.WriteLine("4. Registrar devolución");
+        Console.WriteLine("5. Eliminar préstamo");
+        Console.WriteLine("6. Volver al menú principal");
+        Console.WriteLine();
+    }
+
+    static void CrearPrestamo()
+    {
+        if (contadorPrestamos >= prestamos.Length)
+        {
+            Console.WriteLine("No se pueden crear más préstamos.");
+            return;
+        }
+
+        Console.Write("ID del usuario: ");
+        string idUsuario = Console.ReadLine() ?? "";
+        Console.Write("ID del libro: ");
+        string idLibro = Console.ReadLine() ?? "";
+        Console.Write("Fecha de préstamo (dd/mm/yyyy): ");
+        string fechaPrestamo = Console.ReadLine() ?? "";
+        Console.Write("Fecha límite (dd/mm/yyyy): ");
+        string fechaLimite = Console.ReadLine() ?? "";
+
+        // Validar usuario existe y activo
+        bool usuarioValido = false;
+        for (int i = 0; i < contadorUsuarios; i++)
+        {
+            string[] partesUsuario = usuarios[i].Split(';');
+            if (partesUsuario[0] == idUsuario && partesUsuario[3] == "true")
+            {
+                usuarioValido = true;
+                break;
+            }
+        }
+        if (!usuarioValido)
+        {
+            Console.WriteLine("Usuario no encontrado o inactivo.");
+            return;
+        }
+
+        // Validar libro existe y disponible
+        bool libroValido = false;
+        int indiceLibro = -1;
+        for (int i = 0; i < contadorLibros; i++)
+        {
+            string[] partesLibro = libros[i].Split(';');
+            if (partesLibro[0] == idLibro && partesLibro[5] == "true")
+            {
+                libroValido = true;
+                indiceLibro = i;
+                break;
+            }
+        }
+        if (!libroValido)
+        {
+            Console.WriteLine("Libro no encontrado o no disponible.");
+            return;
+        }
+
+        // Crear préstamo
+        string idPrestamo = (contadorPrestamos + 1).ToString();
+        prestamos[contadorPrestamos] =
+            $"{idPrestamo};{idUsuario};{idLibro};{fechaPrestamo};{fechaLimite};;activo";
+        contadorPrestamos++;
+
+        // Marcar libro como no disponible
+        string[] partesLibroActual = libros[indiceLibro].Split(';');
+        partesLibroActual[5] = "false";
+        libros[indiceLibro] = string.Join(";", partesLibroActual);
+
+        Console.WriteLine("Préstamo creado exitosamente.");
+    }
+
+    static void ListarPrestamos()
+    {
+        Console.WriteLine("Submenú de Listar Préstamos");
+        Console.WriteLine("1. Todos");
+        Console.WriteLine("2. Activos");
+        Console.WriteLine("3. Cerrados");
+        Console.Write("Seleccione: ");
+        string? subopcion = Console.ReadLine();
+
+        switch (subopcion)
+        {
+            case "1":
+                for (int i = 0; i < contadorPrestamos; i++)
+                {
+                    string[] partes = prestamos[i].Split(';');
+                    Console.WriteLine(
+                        $"{partes[0]} - Usuario: {partes[1]} - Libro: {partes[2]} - Estado: {partes[6]}"
+                    );
+                }
+                break;
+            case "2":
+                for (int i = 0; i < contadorPrestamos; i++)
+                {
+                    string[] partes = prestamos[i].Split(';');
+                    if (partes[6] == "activo")
+                        Console.WriteLine(
+                            $"{partes[0]} - Usuario: {partes[1]} - Libro: {partes[2]}"
+                        );
+                }
+                break;
+            case "3":
+                for (int i = 0; i < contadorPrestamos; i++)
+                {
+                    string[] partes = prestamos[i].Split(';');
+                    if (partes[6] == "cerrado")
+                        Console.WriteLine(
+                            $"{partes[0]} - Usuario: {partes[1]} - Libro: {partes[2]}"
+                        );
+                }
+                break;
+            default:
+                Console.WriteLine("Opción no válida.");
+                break;
+        }
+    }
+
+    static void VerDetallePrestamo()
+    {
+        Console.Write("Ingrese ID del préstamo: ");
+        string id = Console.ReadLine() ?? "";
+
+        for (int i = 0; i < contadorPrestamos; i++)
+        {
+            string[] partes = prestamos[i].Split(';');
+            if (partes[0] == id)
+            {
+                Console.WriteLine($"ID Préstamo: {partes[0]}");
+                Console.WriteLine($"ID Usuario: {partes[1]}");
+                Console.WriteLine($"ID Libro: {partes[2]}");
+                Console.WriteLine($"Fecha Préstamo: {partes[3]}");
+                Console.WriteLine($"Fecha Límite: {partes[4]}");
+                Console.WriteLine($"Fecha Devolución: {partes[5]}");
+                Console.WriteLine($"Estado: {partes[6]}");
+                return;
+            }
+        }
+        Console.WriteLine("Préstamo no encontrado.");
+    }
+
+    static void RegistrarDevolucion()
+    {
+        Console.Write("Ingrese ID del préstamo: ");
+        string id = Console.ReadLine() ?? "";
+        Console.Write("Fecha de devolución (dd/mm/yyyy): ");
+        string fechaDevolucion = Console.ReadLine() ?? "";
+
+        for (int i = 0; i < contadorPrestamos; i++)
+        {
+            string[] partes = prestamos[i].Split(';');
+            if (partes[0] == id && partes[6] == "activo")
+            {
+                partes[5] = fechaDevolucion;
+                partes[6] = "cerrado";
+                prestamos[i] = string.Join(";", partes);
+
+                // Marcar libro como disponible
+                string idLibro = partes[2];
+                for (int j = 0; j < contadorLibros; j++)
+                {
+                    string[] partesLibro = libros[j].Split(';');
+                    if (partesLibro[0] == idLibro)
+                    {
+                        partesLibro[5] = "true";
+                        libros[j] = string.Join(";", partesLibro);
+                        break;
+                    }
+                }
+
+                Console.WriteLine("Devolución registrada.");
+                return;
+            }
+        }
+        Console.WriteLine("Préstamo no encontrado o ya cerrado.");
+    }
+
+    static void EliminarPrestamo()
+    {
+        Console.Write("Ingrese ID del préstamo a eliminar: ");
+        string id = Console.ReadLine() ?? "";
+
+        for (int i = 0; i < contadorPrestamos; i++)
+        {
+            string[] partes = prestamos[i].Split(';');
+            if (partes[0] == id)
+            {
+                if (partes[6] == "activo")
+                {
+                    // Devolver libro automáticamente
+                    string idLibro = partes[2];
+                    for (int j = 0; j < contadorLibros; j++)
+                    {
+                        string[] partesLibro = libros[j].Split(';');
+                        if (partesLibro[0] == idLibro)
+                        {
+                            partesLibro[5] = "true";
+                            libros[j] = string.Join(";", partesLibro);
+                            break;
+                        }
+                    }
+                }
+
+                // Mover los préstamos siguientes
+                for (int j = i; j < contadorPrestamos - 1; j++)
+                {
+                    prestamos[j] = prestamos[j + 1];
+                }
+                contadorPrestamos--;
+                Console.WriteLine("Préstamo eliminado.");
+                return;
+            }
+        }
+        Console.WriteLine("Préstamo no encontrado.");
     }
 }
