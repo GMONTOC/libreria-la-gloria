@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using libreria_la_gloria.Models;
 
 class Program
 {
@@ -11,7 +12,35 @@ class Program
     static int contadorPrestamos = 0;
 
     static void Main(string[] args)
-    {
+    {// Crear libros
+Libro libro1 = new Libro(1, "Cien años de soledad", "Gabriel García Márquez", 1967);
+Libro libro2 = new Libro(2, "El principito", "Antoine de Saint-Exupéry", 1943);
+
+// Crear usuarios
+Usuario usuario1 = new Usuario(1, "Gloria", "gloria@email.com");
+Usuario usuario2 = new Usuario(2, "Carlos", "carlos@email.com");
+
+// Crear préstamo
+Prestamo prestamo1 = new Prestamo(1, libro1, usuario1, DateTime.Now.AddDays(-10));
+
+// Mostrar información
+Console.WriteLine("=== RESÚMENES ===");
+Console.WriteLine(libro1.ResumenCorto());
+Console.WriteLine(usuario1.ResumenCorto());
+Console.WriteLine(prestamo1.ResumenCorto());
+
+Console.WriteLine("\n=== DETALLES ===");
+Console.WriteLine(libro1.DetalleCompleto());
+Console.WriteLine(usuario1.DetalleCompleto());
+Console.WriteLine(prestamo1.DetalleCompleto());
+
+Console.WriteLine("\n=== VALIDACIONES ===");
+Console.WriteLine($"Libro disponible: {libro1.Disponible}");
+Console.WriteLine($"Usuario activo: {usuario1.Activo}");
+Console.WriteLine($"Estado: {prestamo1.Estado}");
+Console.WriteLine($"¿Vencido?: {prestamo1.EstaVencido()}");
+Console.WriteLine($"Días: {prestamo1.DiasTranscurridos()}");
+       
         bool salir = false;
 
         while (!salir)
