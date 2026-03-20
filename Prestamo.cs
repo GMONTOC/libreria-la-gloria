@@ -5,10 +5,14 @@ namespace libreria_la_gloria.Models
     public class Prestamo
     {
         public int Id { get; set; }
-        public Libro Libro { get; set; }
-        public Usuario Usuario { get; set; }
+
+        public Libro Libro { get; set; } = null!;
+        public Usuario Usuario { get; set; } = null!;
+
         public DateTime FechaPrestamo { get; set; }
+
         public DateTime? FechaDevolucion { get; set; }
+
         public EstadoPrestamo Estado { get; set; }
 
         public Prestamo()
@@ -51,5 +55,13 @@ namespace libreria_la_gloria.Models
         {
             return DetalleCompleto();
         }
+    }
+}namespace libreria_la_gloria.Models
+{
+    public enum EstadoPrestamo
+    {
+        Activo,
+        Devuelto,
+        Vencido
     }
 }
